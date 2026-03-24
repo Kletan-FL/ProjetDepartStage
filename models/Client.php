@@ -33,7 +33,7 @@ class Client
      */
     public function get($id)
     {
-        $sql = "SELECT * FROM CLIENT WHERE idC = :id";
+        $sql = "SELECT * FROM CLIENT WHERE IDC = :id";
         $req = $this->conn->prepare($sql);
         $req->execute(['id' => $id]);
         return $req->fetch();
@@ -65,7 +65,7 @@ class Client
         }
         $modifs = implode(', ', $modifs);
 
-        $sql = "UPDATE CLIENT SET $modifs WHERE idC = :id";
+        $sql = "UPDATE CLIENT SET $modifs WHERE IDC = :id";
         $req = $this->conn->prepare($sql);
 
         $params = $data;
@@ -80,7 +80,7 @@ class Client
      */
     public function delete($id)
     {
-        $sql = "DELETE FROM CLIENT WHERE idC = :id";
+        $sql = "DELETE FROM CLIENT WHERE IDC = :id";
         $req = $this->conn->prepare($sql);
         return $req->execute(['id' => $id]);
     }

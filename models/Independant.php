@@ -33,7 +33,7 @@ class Independant
      */
     public function get($id)
     {
-        $sql = "SELECT * FROM INDEPENDANT WHERE idI = :id";
+        $sql = "SELECT * FROM INDEPENDANT WHERE IDI = :id";
         $req = $this->conn->prepare($sql);
         $req->execute(['id' => $id]);
         return $req->fetch();
@@ -65,7 +65,7 @@ class Independant
         }
         $modifs = implode(', ', $modifs);
 
-        $sql = "UPDATE INDEPENDANT SET $modifs WHERE idI = :id";
+        $sql = "UPDATE INDEPENDANT SET $modifs WHERE IDI = :id";
         $req = $this->conn->prepare($sql);
 
         $params = $data;
@@ -80,7 +80,7 @@ class Independant
      */
     public function delete($id)
     {
-        $sql = "DELETE FROM INDEPENDANT WHERE idI = :id";
+        $sql = "DELETE FROM INDEPENDANT WHERE IDI = :id";
         $req = $this->conn->prepare($sql);
         return $req->execute(['id' => $id]);
     }
