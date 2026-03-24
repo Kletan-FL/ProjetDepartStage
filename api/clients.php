@@ -1,1 +1,8 @@
-#! API (regarde quelle méthode appellée et utilise la bonne fonction/traitement JSON)
+<?php
+
+$model = new Client($conn);
+
+if ($_SERVER['REQUEST_METHOD'] === 'GET') {
+    echo json_encode($model->getAll());
+    exit;
+}
