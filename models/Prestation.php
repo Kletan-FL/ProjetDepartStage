@@ -84,4 +84,52 @@ class Prestation
         $req = $this->conn->prepare($sql);
         return $req->execute(['id' => $id]);
     }
+
+    /**
+     * Modifie une prestation avec l'id donné ou le créé s'il n'existe pas
+     * Retourne un booléen (true si création/modification, false sinon)
+     */
+    public function upsert($id, array $data) {
+        if (empty($data)) {
+            return false;
+        }
+
+        /**
+         * Equivalent du GET
+         */
+        $sqlGet = "SELECT * FROM PRESTATION WHERE IDP = :id";
+        $reqGet = $this->conn->prepare($sqlGet);
+        $reqGet->execute(['id' => $id]);
+        $existe = $reqGet->fetch();
+
+        /**
+         * Si la prestation n'existe pas : INSERT
+         */
+        if (!$existe) {
+            $champs = implode(', ', array_keys($data));
+            $valeurs = ':' . implode(', :', array_keys($data));
+            
+            $sqlInsert = "INSERT INTO PRESTATION ($champs) VALUES ($valeurs)";
+            
+            $reqInsert = $this->conn->prepare($sqlInsert);
+            return $reqInsert->execute($data);
+        }
+
+        /**
+         * Si la prestation existe : UPDATE
+         */
+        $modifs = [];
+        foreach ($data as $col => $value) {
+            $modifs[] = "$col = :$col";
+        }
+        $modifs = implode(', ', $modifs);
+
+        $sqlUpdate = "UPDATE PRESTATION SET $modifs WHERE IDP = :id";
+        $reqUpdate = $this->conn->prepare($sqlUpdate);
+
+        $params = $data;
+        $params['id'] = $id;
+
+        return $reqUpdate->execute($params);
+    }
 }
