@@ -11,67 +11,95 @@ class Prestation
 
     /**
      * Créé une nouvelle prestation avec les données fournies
-     * Retourne un booléen (true si création, false sinon)
+     * Retourne l'ID de la prestation créée
      */
     public function create(array $data)
     {
         if (empty($data)) {
-            return false;
+            return ['Erreur' => 'Aucune donnée fournie'];
         }
+        try {
 
-        $champs = implode(', ', array_keys($data));
-        $valeurs = ':' . implode(', :', array_keys($data));
+            $champs = implode(', ', array_keys($data));
+            $valeurs = ':' . implode(', :', array_keys($data));
 
-        $sql = "INSERT INTO PRESTATION ($champs) VALUES ($valeurs)";
+            $sql = "INSERT INTO PRESTATION ($champs) VALUES ($valeurs)";
 
-        $req = $this->conn->prepare($sql);
-        return $req->execute($data);
+            $req = $this->conn->prepare($sql);
+            $req->execute($data);
+            return ['ID' => $this->conn->lastInsertId()];
+
+        } catch (PDOException $e) {
+
+            return [
+                'Erreur' => 'Erreur DB',
+                'Details' => $e->getMessage()
+            ];
+
+        }
     }
 
     /**
      * Récupère et retourne une prestation avec l'id donné
+     * Retourne un tableau si prestation existante ou false sinon
      */
     public function get($id)
     {
         $sql = "SELECT * FROM PRESTATION WHERE IDP = :id";
         $req = $this->conn->prepare($sql);
         $req->execute(['id' => $id]);
-        return $req->fetch(PDO::FETCH_ASSOC);
+        
+        return $req->fetch();
     }
 
     /**
-     * Récupère toutes les prestations et les retourne
+     * Récupère toutes les prestations
+     * Retourne un tableau (éventuellement vide si pas de prestations)
      */
     public function getAll()
     {
         $sql = "SELECT * FROM PRESTATION";
         $req = $this->conn->query($sql);
-        return $req->fetchAll(PDO::FETCH_ASSOC);
+        
+        return $req->fetchAll();
     }
 
     /**
      * Modifie une prestation avec l'id donné
-     * Retourne un booléen (true si modification, false sinon)
+     * Retourne le nombre de lignes modifiées
      */
     public function update($id, array $data)
     {
         if (empty($data)) {
-            return false;
+            return ['Erreur' => 'Aucune donnée fournie'];
         }
 
-        $modifs = [];
-        foreach ($data as $col => $value) {
-            $modifs[] = "$col = :$col";
+        try {
+
+            $modifs = [];
+            foreach ($data as $col => $value) {
+                $modifs[] = "$col = :$col";
+            }
+            $modifs = implode(', ', $modifs);
+
+            $sql = "UPDATE PRESTATION SET $modifs WHERE IDP = :id";
+            $req = $this->conn->prepare($sql);
+
+            $params = $data;
+            $params['id'] = $id;
+
+            $req->execute($params);
+
+            return ['Lignes modifiees' => $req->rowCount()];
+
+        } catch (PDOException $e) {
+
+            return [
+                'Erreur' => 'Erreur DB',
+                'Details' => $e->getMessage()
+            ];
+
         }
-        $modifs = implode(', ', $modifs);
-
-        $sql = "UPDATE PRESTATION SET $modifs WHERE IDP = :id";
-        $req = $this->conn->prepare($sql);
-
-        $params = $data;
-        $params['id'] = $id;
-
-        return $req->execute($params);
     }
 
     /**
@@ -82,16 +110,19 @@ class Prestation
     {
         $sql = "DELETE FROM PRESTATION WHERE IDP = :id";
         $req = $this->conn->prepare($sql);
-        return $req->execute(['id' => $id]);
+        $req->execute(['id' => $id]);
+
+        return $req->rowCount() > 0; // False si la prestation à supprimer n'existe pas
     }
 
     /**
-     * Modifie une prestation avec l'id donné ou le créé s'il n'existe pas
-     * Retourne un booléen (true si création/modification, false sinon)
+     * Modifie une prestation avec l'id donné ou la créée si elle n'existe pas
+     * En cas de création, retourne l'ID de la prestation créée
+     * En cas de modification, retourne le nombre de lignes modifiées
      */
     public function upsert($id, array $data) {
         if (empty($data)) {
-            return false;
+            return ['Erreur' => 'Aucune donnée fournie'];
         }
 
         /**
@@ -106,30 +137,54 @@ class Prestation
          * Si la prestation n'existe pas : INSERT
          */
         if (!$existe) {
-            $champs = implode(', ', array_keys($data));
-            $valeurs = ':' . implode(', :', array_keys($data));
-            
-            $sqlInsert = "INSERT INTO PRESTATION ($champs) VALUES ($valeurs)";
-            
-            $reqInsert = $this->conn->prepare($sqlInsert);
-            return $reqInsert->execute($data);
+            try {
+
+                $champs = implode(', ', array_keys($data));
+                $valeurs = ':' . implode(', :', array_keys($data));
+                
+                $sql = "INSERT INTO PRESTATION ($champs) VALUES ($valeurs)";
+                
+                $req = $this->conn->prepare($sql);
+                $req->execute($data);
+                return ['ID' => $this->conn->lastInsertId()];
+
+                } catch (PDOException $e) {
+
+                return [
+                    'Erreur' => 'Erreur DB',
+                    'Details' => $e->getMessage()
+                ];
+            }
         }
 
         /**
          * Si la prestation existe : UPDATE
          */
-        $modifs = [];
-        foreach ($data as $col => $value) {
-            $modifs[] = "$col = :$col";
+        try {
+            
+            $modifs = [];
+            foreach ($data as $col => $value) {
+                $modifs[] = "$col = :$col";
+            }
+            $modifs = implode(', ', $modifs);
+
+            $sql = "UPDATE PRESTATION SET $modifs WHERE IDP = :id";
+            $req = $this->conn->prepare($sql);
+
+            $params = $data;
+            $params['id'] = $id;
+            
+            $req->execute($params);
+
+            return ['Lignes modifiees' => $req->rowCount()];
+
+        } catch (PDOException $e) {
+
+            return [
+                'Erreur' => 'Erreur DB',
+                'Details' => $e->getMessage()
+            ];
+
         }
-        $modifs = implode(', ', $modifs);
-
-        $sqlUpdate = "UPDATE PRESTATION SET $modifs WHERE IDP = :id";
-        $reqUpdate = $this->conn->prepare($sqlUpdate);
-
-        $params = $data;
-        $params['id'] = $id;
-
-        return $reqUpdate->execute($params);
     }
 }

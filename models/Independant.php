@@ -11,67 +11,96 @@ class Independant
 
     /**
      * Créé un nouvel indépendant avec les données fournies
-     * Retourne un booléen (true si création, false sinon)
+     * Retourne l'ID de l'indépendant créé
      */
     public function create(array $data)
     {
         if (empty($data)) {
-            return false;
+            return ['Erreur' => 'Aucune donnée fournie'];
         }
 
-        $champs = implode(', ', array_keys($data));
-        $valeurs = ':' . implode(', :', array_keys($data));
+        try  {
         
-        $sql = "INSERT INTO INDEPENDANT ($champs) VALUES ($valeurs)";
-        
-        $req = $this->conn->prepare($sql);
-        return $req->execute($data);
+            $champs = implode(', ', array_keys($data));
+            $valeurs = ':' . implode(', :', array_keys($data));
+            
+            $sql = "INSERT INTO INDEPENDANT ($champs) VALUES ($valeurs)";
+            
+            $req = $this->conn->prepare($sql);
+            $req->execute($data);
+            return ['ID' => $this->conn->lastInsertId()];
+
+        } catch (PDOException $e) {
+
+            return [
+                'Erreur' => 'Erreur DB',
+                'Details' => $e->getMessage()
+            ];
+
+        }
     }
 
     /**
-     * Récupère et retourne un indépendant avec l'id donné
+     * Récupère un indépendant avec l'id donné
+     * Retourne un tableau si indépendant existant ou false sinon
      */
     public function get($id)
     {
         $sql = "SELECT * FROM INDEPENDANT WHERE IDI = :id";
         $req = $this->conn->prepare($sql);
         $req->execute(['id' => $id]);
+
         return $req->fetch();
     }
 
     /**
-     * Récupère tous les indépendants et les retourne
+     * Récupère tous les indépendants
+     * Retourne un tableau (éventuellement vide si pas d'indépendants)
      */
     public function getAll()
     {
         $sql = "SELECT * FROM INDEPENDANT";
         $req = $this->conn->query($sql);
+
         return $req->fetchAll();
     }
 
     /**
      * Modifie un indépendant avec l'id donné
-     * Retourne un booléen (true si modification, false sinon)
+     * Retourne le nombre de lignes modifiées
      */
     public function update($id, array $data)
     {
         if (empty($data)) {
-            return false;
+            return ['Erreur' => 'Aucune donnée fournie'];
         }
 
-        $modifs = [];
-        foreach ($data as $col => $value) {
-            $modifs[] = "$col = :$col";
+        try  {
+
+            $modifs = [];
+            foreach ($data as $col => $value) {
+                $modifs[] = "$col = :$col";
+            }
+            $modifs = implode(', ', $modifs);
+
+            $sql = "UPDATE INDEPENDANT SET $modifs WHERE IDI = :id";
+            $req = $this->conn->prepare($sql);
+
+            $params = $data;
+            $params['id'] = $id;
+
+            $req->execute($params);
+
+            return ['Lignes modifiees' => $req->rowCount()];
+
+        } catch (PDOException $e) {
+
+            return [
+                'Erreur' => 'Erreur DB',
+                'Details' => $e->getMessage()
+            ];
+
         }
-        $modifs = implode(', ', $modifs);
-
-        $sql = "UPDATE INDEPENDANT SET $modifs WHERE IDI = :id";
-        $req = $this->conn->prepare($sql);
-
-        $params = $data;
-        $params['id'] = $id;
-
-        return $req->execute($params);
     }
 
     /**
@@ -82,16 +111,19 @@ class Independant
     {
         $sql = "DELETE FROM INDEPENDANT WHERE IDI = :id";
         $req = $this->conn->prepare($sql);
-        return $req->execute(['id' => $id]);
+        $req->execute(['id' => $id]);
+
+        return $req->rowCount() > 0; // False si l'indépendant à supprimer n'existe pas
     }
 
     /**
      * Modifie un indépendant avec l'id donné ou le créé s'il n'existe pas
-     * Retourne un booléen (true si création/modification, false sinon)
+     * En cas de création, retourne l'ID de l'indépendant créé
+     * En cas de modification, retourne le nombre de lignes modifiées
      */
     public function upsert($id, array $data) {
         if (empty($data)) {
-            return false;
+            return ['Erreur' => 'Aucune donnée fournie'];
         }
 
         /**
@@ -106,30 +138,54 @@ class Independant
          * Si l'indépendant n'existe pas : INSERT
          */
         if (!$existe) {
-            $champs = implode(', ', array_keys($data));
-            $valeurs = ':' . implode(', :', array_keys($data));
-            
-            $sqlInsert = "INSERT INTO INDEPENDANT ($champs) VALUES ($valeurs)";
-            
-            $reqInsert = $this->conn->prepare($sqlInsert);
-            return $reqInsert->execute($data);
+            try {
+
+                $champs = implode(', ', array_keys($data));
+                $valeurs = ':' . implode(', :', array_keys($data));
+                
+                $sql = "INSERT INTO INDEPENDANT ($champs) VALUES ($valeurs)";
+                
+                $req = $this->conn->prepare($sql);
+                $req->execute($data);
+                return ['ID' => $this->conn->lastInsertId()];
+
+                } catch (PDOException $e) {
+
+                return [
+                    'Erreur' => 'Erreur DB',
+                    'Details' => $e->getMessage()
+                ];
+            }
         }
 
         /**
          * Si l'indépendant existe : UPDATE
          */
-        $modifs = [];
-        foreach ($data as $col => $value) {
-            $modifs[] = "$col = :$col";
+        try {
+            
+            $modifs = [];
+            foreach ($data as $col => $value) {
+                $modifs[] = "$col = :$col";
+            }
+            $modifs = implode(', ', $modifs);
+
+            $sql = "UPDATE INDEPENDANT SET $modifs WHERE IDI = :id";
+            $req = $this->conn->prepare($sql);
+
+            $params = $data;
+            $params['id'] = $id;
+            
+            $req->execute($params);
+
+            return ['Lignes modifiees' => $req->rowCount()];
+
+        } catch (PDOException $e) {
+
+            return [
+                'Erreur' => 'Erreur DB',
+                'Details' => $e->getMessage()
+            ];
+
         }
-        $modifs = implode(', ', $modifs);
-
-        $sqlUpdate = "UPDATE INDEPENDANT SET $modifs WHERE IDI = :id";
-        $reqUpdate = $this->conn->prepare($sqlUpdate);
-
-        $params = $data;
-        $params['id'] = $id;
-
-        return $reqUpdate->execute($params);
     }
 }

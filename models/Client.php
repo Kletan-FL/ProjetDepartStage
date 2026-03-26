@@ -11,67 +11,97 @@ class Client
 
     /**
      * Créé un nouveau client avec les données fournies
-     * Retourne un booléen (true si création, false sinon)
+     * Retourne l'ID du client créé
      */
     public function create(array $data)
     {
         if (empty($data)) {
-            return false;
+            return ['Erreur' => 'Aucune donnée fournie'];
         }
 
-        $champs = implode(', ', array_keys($data));
-        $valeurs = ':' . implode(', :', array_keys($data));
-        
-        $sql = "INSERT INTO CLIENT ($champs) VALUES ($valeurs)";
-        
-        $req = $this->conn->prepare($sql);
-        return $req->execute($data);
+        try {
+
+            $champs = implode(', ', array_keys($data));
+            $valeurs = ':' . implode(', :', array_keys($data));
+            
+            $sql = "INSERT INTO CLIENT ($champs) VALUES ($valeurs)";
+            
+            $req = $this->conn->prepare($sql);
+            $req->execute($data);
+            return ['ID' => $this->conn->lastInsertId()];
+            
+        } catch (PDOException $e) {
+
+            return [
+                'Erreur' => 'Erreur DB',
+                'Details' => $e->getMessage()
+            ];
+
+        }
     }
 
     /**
-     * Récupère et retourne un client avec l'id donné
+     * Récupère un client avec l'id donné
+     * Retourne un tableau si client existant ou false sinon
      */
     public function get($id)
     {
         $sql = "SELECT * FROM CLIENT WHERE IDC = :id";
         $req = $this->conn->prepare($sql);
         $req->execute(['id' => $id]);
-        return $req->fetch();
+        
+        return $req->fetch() ;
     }
 
     /**
-     * Récupère tous les clients et les retourne
+     * Récupère tous les clients
+     * Retourne un tableau (éventuellement vide si pas de clients)
      */
     public function getAll()
     {
         $sql = "SELECT * FROM CLIENT";
         $req = $this->conn->query($sql);
+
         return $req->fetchAll();
     }
 
     /**
      * Modifie un client avec l'id donné
-     * Retourne un booléen (true si modification, false sinon)
+     * Retourne le nombre de lignes modifiées
      */
     public function update($id, array $data)
     {
+
         if (empty($data)) {
-            return false;
+            return ['Erreur' => 'Aucune donnée fournie'];
         }
 
-        $modifs = [];
-        foreach ($data as $col => $value) {
-            $modifs[] = "$col = :$col";
+        try {
+            
+            $modifs = [];
+            foreach ($data as $col => $value) {
+                $modifs[] = "$col = :$col";
+            }
+            $modifs = implode(', ', $modifs);
+
+            $sql = "UPDATE CLIENT SET $modifs WHERE IDC = :id";
+            $req = $this->conn->prepare($sql);
+
+            $params = $data;
+            $params['id'] = $id;
+            
+            $req->execute($params);
+
+            return ['Lignes modifiees' => $req->rowCount()];
+
+        } catch (PDOException $e) {
+
+            return [
+                'Erreur' => 'Erreur DB',
+                'Details' => $e->getMessage()
+            ];
+
         }
-        $modifs = implode(', ', $modifs);
-
-        $sql = "UPDATE CLIENT SET $modifs WHERE IDC = :id";
-        $req = $this->conn->prepare($sql);
-
-        $params = $data;
-        $params['id'] = $id;
-
-        return $req->execute($params);
     }
 
     /**
@@ -82,16 +112,19 @@ class Client
     {
         $sql = "DELETE FROM CLIENT WHERE IDC = :id";
         $req = $this->conn->prepare($sql);
-        return $req->execute(['id' => $id]);
+        $req->execute(['id' => $id]);
+
+        return $req->rowCount() > 0; // False si le client à supprimer n'existe pas
     }
 
     /**
      * Modifie un client avec l'id donné ou le créé s'il n'existe pas
-     * Retourne un booléen (true si création/modification, false sinon)
+     * En cas de création, retourne l'ID du client créé
+     * En cas de modification, retourne le nombre de lignes modifiées
      */
     public function upsert($id, array $data) {
         if (empty($data)) {
-            return false;
+            return ['Erreur' => 'Aucune donnée fournie'];
         }
 
         /**
@@ -106,30 +139,54 @@ class Client
          * Si le client n'existe pas : INSERT
          */
         if (!$existe) {
-            $champs = implode(', ', array_keys($data));
-            $valeurs = ':' . implode(', :', array_keys($data));
-            
-            $sqlInsert = "INSERT INTO CLIENT ($champs) VALUES ($valeurs)";
-            
-            $reqInsert = $this->conn->prepare($sqlInsert);
-            return $reqInsert->execute($data);
+            try {
+
+                $champs = implode(', ', array_keys($data));
+                $valeurs = ':' . implode(', :', array_keys($data));
+                
+                $sql = "INSERT INTO CLIENT ($champs) VALUES ($valeurs)";
+                
+                $req = $this->conn->prepare($sql);
+                $req->execute($data);
+                return ['ID' => $this->conn->lastInsertId()];
+
+                } catch (PDOException $e) {
+
+                return [
+                    'Erreur' => 'Erreur DB',
+                    'Details' => $e->getMessage()
+                ];
+            }
         }
 
         /**
          * Si le client existe : UPDATE
          */
-        $modifs = [];
-        foreach ($data as $col => $value) {
-            $modifs[] = "$col = :$col";
+        try {
+            
+            $modifs = [];
+            foreach ($data as $col => $value) {
+                $modifs[] = "$col = :$col";
+            }
+            $modifs = implode(', ', $modifs);
+
+            $sql = "UPDATE CLIENT SET $modifs WHERE IDC = :id";
+            $req = $this->conn->prepare($sql);
+
+            $params = $data;
+            $params['id'] = $id;
+            
+            $req->execute($params);
+
+            return ['Lignes modifiees' => $req->rowCount()];
+
+        } catch (PDOException $e) {
+
+            return [
+                'Erreur' => 'Erreur DB',
+                'Details' => $e->getMessage()
+            ];
+
         }
-        $modifs = implode(', ', $modifs);
-
-        $sqlUpdate = "UPDATE CLIENT SET $modifs WHERE IDC = :id";
-        $reqUpdate = $this->conn->prepare($sqlUpdate);
-
-        $params = $data;
-        $params['id'] = $id;
-
-        return $reqUpdate->execute($params);
     }
 }
