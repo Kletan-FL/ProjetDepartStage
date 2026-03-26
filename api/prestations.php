@@ -1,6 +1,6 @@
 <?php
 
-$model = new Independant($conn);
+$model = new Prestation($conn);
 
 /**
  * Récupération de l'URL
