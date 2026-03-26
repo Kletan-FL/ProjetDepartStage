@@ -8,16 +8,16 @@ $model = new Client($conn);
 $uri = $_SERVER['REQUEST_URI'];
 
 /**
- * Récupération de l'id s'il est donné
+ * Récupération de l'id
  */
 $id = null;
 
 if (preg_match('#^/api/clients/(\d+)$#', $uri, $matches)) {
-    $id = $matches[1];
+    $id = (int)$matches[1];
 }
 
-/**
- * Récupération de l'input JSON (pour la création ou modification)
+/** 
+ * Récupération du JSON
  */
 $input = json_decode(file_get_contents('php://input'), true);
 
@@ -27,10 +27,20 @@ $input = json_decode(file_get_contents('php://input'), true);
 if ($_SERVER['REQUEST_METHOD'] === 'GET') {
 
     if ($id !== null) {
-        echo json_encode($model->get($id));
+        $client = $model->get($id);
+
+        if ($client === false) {
+            http_response_code(404);
+            echo json_encode(['Erreur' => 'Client not found']);
+            exit;
+        }
+
+        http_response_code(200);
+        echo json_encode($client);
         exit;
     }
 
+    http_response_code(200);
     echo json_encode($model->getAll());
     exit;
 }
@@ -39,7 +49,23 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
  * Cas POST : Créer un client
  */
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    echo json_encode($model->create($input));
+
+    if (!$input) {
+        http_response_code(400);
+        echo json_encode(['Erreur' => 'JSON invalide']);
+        exit;
+    }
+
+    $resultat = $model->create($input);
+
+    if (isset($resultat['Erreur'])) {
+        http_response_code(500); // 500 parce que Pb DB ou 400 parce que Bad Request?
+        echo json_encode($resultat);
+        exit;
+    }
+
+    http_response_code(201);
+    echo json_encode($resultat);
     exit;
 }
 
@@ -47,7 +73,29 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
  * Cas PUT : Modifier un client
  */
 if ($_SERVER['REQUEST_METHOD'] === 'PUT' && $id !== null) {
-    echo json_encode($model->update($id, $input));
+
+    if (!$input) {
+        http_response_code(400);
+        echo json_encode(['Erreur' => 'JSON invalide']);
+        exit;
+    }
+
+    $resultat = $model->update($id, $input);
+
+    if (isset($resultat['Erreur'])) {
+        http_response_code(500); // 500 parce que Pb DB ou 400 parce que Bad Request?
+        echo json_encode($resultat);
+        exit;
+    }
+
+    if ($resultat['Lignes modifiees'] === 0) {
+        http_response_code(404);
+        echo json_encode(['Erreur' => 'Client not found']);
+        exit;
+    }
+
+    http_response_code(200);
+    echo json_encode($resultat);
     exit;
 }
 
@@ -55,7 +103,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'PUT' && $id !== null) {
  * Cas DELETE : Supprimer un client
  */
 if ($_SERVER['REQUEST_METHOD'] === 'DELETE' && $id !== null) {
-    echo json_encode($model->delete($id));
+
+    $supprime = $model->delete($id);
+
+    if (!$supprime) {
+        http_response_code(404);
+        echo json_encode(['Erreur' => 'Client not found']);
+        exit;
+    }
+
+    http_response_code(200);
+    echo json_encode(['Suppression' => true]);
     exit;
 }
 

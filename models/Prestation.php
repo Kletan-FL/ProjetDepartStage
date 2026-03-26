@@ -15,9 +15,6 @@ class Prestation
      */
     public function create(array $data)
     {
-        if (empty($data)) {
-            return ['Erreur' => 'Aucune donnée fournie'];
-        }
         try {
 
             $champs = implode(', ', array_keys($data));
@@ -70,9 +67,6 @@ class Prestation
      */
     public function update($id, array $data)
     {
-        if (empty($data)) {
-            return ['Erreur' => 'Aucune donnée fournie'];
-        }
 
         try {
 
@@ -121,9 +115,6 @@ class Prestation
      * En cas de modification, retourne le nombre de lignes modifiées
      */
     public function upsert($id, array $data) {
-        if (empty($data)) {
-            return ['Erreur' => 'Aucune donnée fournie'];
-        }
 
         /**
          * Equivalent du GET
