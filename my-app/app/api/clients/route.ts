@@ -1,5 +1,7 @@
 import db from "@/lib/db";
 
+// TODO : Rajouter le type Client
+
 /**
  * * Requête GET
  * On récupère tous les clients
