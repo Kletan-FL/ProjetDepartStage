@@ -1,6 +1,6 @@
 import db from "@/lib/db";
 
-// TODO : Rajouter le type Client
+import type { Client } from "@/types/client";
 
 /**
  * * Requête GET
@@ -10,7 +10,7 @@ import db from "@/lib/db";
  */
 export function GET() {
   try {
-    const clients = db.prepare("SELECT * FROM CLIENT").all();
+    const clients = db.prepare("SELECT * FROM CLIENT").all() as Client[];
     return Response.json(clients);
   } catch (err) {
     return new Response(JSON.stringify({ Erreur : "Erreur DB", Details : String(err) }), { status : 500 });
