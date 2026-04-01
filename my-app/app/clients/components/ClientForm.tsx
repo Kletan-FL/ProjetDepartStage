@@ -40,7 +40,7 @@ export default function ClientForm({
       NOM: data?.NOM ?? "",
       SIRET: data?.SIRET ?? "",
       VILLE: data?.VILLE ?? "",
-      DOMAINE: data?.DOMAINE ?? "",
+      DOMAINE: data?.DOMAINE ?? undefined,
       ADRESSE: data?.ADRESSE ?? "",
     },
   });
@@ -132,11 +132,22 @@ export default function ClientForm({
               render={({ field, fieldState }) => (
                 <Field data-invalid={fieldState.invalid}>
                   <FieldLabel>Domaine</FieldLabel>
-                  <Input
+
+                  <select
                     {...field}
-                    placeholder="Nom du domaine d'activité"
+                    onChange={(e) =>
+                      field.onChange(e.target.value || undefined)
+                    }
+                    className="border rounded px-2 py-1"
                     aria-invalid={fieldState.invalid}
-                  />
+                  >
+                    <option value="">Choisir un domaine</option>
+                    <option value="Informatique">Informatique</option>
+                    <option value="Finance">Finance</option>
+                    <option value="Marketing">Marketing</option>
+                    <option value="RH">RH</option>
+                  </select>
+
                   {fieldState.invalid && (
                     <FieldError errors={[fieldState.error]} />
                   )}
