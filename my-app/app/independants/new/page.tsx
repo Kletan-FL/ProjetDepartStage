@@ -1,4 +1,3 @@
-/*
 "use client";
 
 import { useRouter } from "next/navigation";
@@ -30,28 +29,6 @@ export default function NewIndependantPage() {
       defaultValues={defaultValues}
       mode="create"
       onSubmit={handleCreate}
-    />
-  );
-}
-*/
-
-import IndependantForm from "../components/IndependantForm";
-import { createIndependant } from "../api";
-
-export default function NewIndependantPage() {
-  const defaultValues = {
-    NOM: "",
-    PRENOM: "",
-    EMAIL: "",
-    TELEPHONE: "",
-    TJM_SOUHAITE: 0,
-  };
-
-  return (
-    <IndependantForm
-      defaultValues={defaultValues}
-      mode="create"
-      onSubmit={createIndependant}
     />
   );
 }

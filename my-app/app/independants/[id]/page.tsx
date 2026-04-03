@@ -1,4 +1,5 @@
-/*
+"use client";
+
 import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 
@@ -61,39 +62,6 @@ export default function IndependantDetailsPage() {
           </Button>
         )
       }
-    />
-  );
-}
-*/
-
-import IndependantForm from "../components/IndependantForm";
-import { updateIndependant } from "../api";
-
-export default async function IndependantDetailsPage({
-  params,
-}: {
-  params: { id: string };
-}) {
-  const id = Number(params.id);
-
-  const data = await fetch(`http://localhost:3000/api/independants/${id}`, {
-    cache: "no-store",
-  }).then((res) => res.json());
-
-  const defaultValues = {
-    NOM: data.NOM ?? "",
-    PRENOM: data.PRENOM ?? "",
-    EMAIL: data.EMAIL ?? "",
-    TELEPHONE: data.TELEPHONE ?? "",
-    TJM_SOUHAITE: data.TJM_SOUHAITE ?? 0,
-  };
-
-  return (
-    <IndependantForm
-      defaultValues={defaultValues}
-      mode="view"
-      onSubmit={(values) => updateIndependant(id, values)}
-      boutonHeader={null}
     />
   );
 }
