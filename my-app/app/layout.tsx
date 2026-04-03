@@ -1,16 +1,6 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
-
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
-});
-
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
-});
+import Link from "next/link";
 
 export const metadata: Metadata = {
   title: "Annuaire Future Legends",
@@ -19,15 +9,30 @@ export const metadata: Metadata = {
 
 export default function RootLayout({
   children,
-}: Readonly<{
+}: {
   children: React.ReactNode;
-}>) {
+}) {
   return (
-    <html
-      lang="en"
-      className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
-    >
-      <body className="min-h-full flex flex-col">{children}</body>
+    <html lang="fr">
+      <body>
+        <nav className="border-b px-6 py-3 flex items-center gap-8">
+          <Link href="/" className="font-bold text-lg">
+            Future Legends
+          </Link>
+          <div className="flex gap-6">
+            <Link href="/independants" className="text-sm hover:underline">
+              Indépendants
+            </Link>
+            <Link href="/clients" className="text-sm hover:underline">
+              Clients
+            </Link>
+            <Link href="/prestations" className="text-sm hover:underline">
+              Prestations
+            </Link>
+          </div>
+        </nav>
+        <main>{children}</main>
+      </body>
     </html>
   );
 }
