@@ -2,12 +2,10 @@
 
 import { Controller, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-
 import {
   independantSchema,
   IndependantFormData,
-} from "@/lib/independantSchema";
-
+} from "@/lib/schemas/independantSchema";
 import {
   Card,
   CardHeader,
@@ -27,31 +25,31 @@ import Link from "next/link";
 
 export default function IndependantForm({
   defaultValues,
-  mode,
+  isEditing,
   onSubmit,
   boutonHeader,
+  title,
 }: {
   defaultValues: IndependantFormData;
-  mode: "create" | "edit" | "view";
+  isEditing: boolean; // true = champs actifs, false = champs désactivés
   onSubmit: (values: IndependantFormData) => Promise<void>;
   boutonHeader?: React.ReactNode;
+  title?: string; // "Créer un indépendant" ou "Détails de l'indépendant"
 }) {
   const form = useForm<IndependantFormData>({
     resolver: zodResolver(independantSchema),
     defaultValues,
   });
 
-  const disabled = mode === "view";
-
+  // Plus de variable `disabled` intermédiaire — on utilise isEditing directement
   return (
     <Card className="w-full sm:max-w-xl mx-auto mt-8">
       <CardHeader>
         <CardTitle>
-          {mode === "create"
-            ? "Créer un indépendant"
-            : mode === "edit"
+          {title ??
+            (isEditing
               ? "Modifier un indépendant"
-              : "Détails de l'indépendant"}
+              : "Détails de l'indépendant")}
         </CardTitle>
       </CardHeader>
 
@@ -60,77 +58,30 @@ export default function IndependantForm({
       <CardContent>
         <form id="independant-form" onSubmit={form.handleSubmit(onSubmit)}>
           <FieldGroup>
-            <Controller
-              name="NOM"
-              control={form.control}
-              render={({ field, fieldState }) => (
-                <Field data-invalid={fieldState.invalid}>
-                  <FieldLabel>Nom</FieldLabel>
-                  <Input
-                    {...field}
-                    disabled={disabled}
-                    aria-invalid={fieldState.invalid}
-                  />
-                  {fieldState.invalid && (
-                    <FieldError errors={[fieldState.error]} />
+            {(["NOM", "PRENOM", "EMAIL", "TELEPHONE"] as const).map(
+              (fieldName) => (
+                <Controller
+                  key={fieldName}
+                  name={fieldName}
+                  control={form.control}
+                  render={({ field, fieldState }) => (
+                    <Field data-invalid={fieldState.invalid}>
+                      <FieldLabel>
+                        {fieldName.charAt(0) + fieldName.slice(1).toLowerCase()}
+                      </FieldLabel>
+                      <Input
+                        {...field}
+                        disabled={!isEditing}
+                        aria-invalid={fieldState.invalid}
+                      />
+                      {fieldState.invalid && (
+                        <FieldError errors={[fieldState.error]} />
+                      )}
+                    </Field>
                   )}
-                </Field>
-              )}
-            />
-
-            <Controller
-              name="PRENOM"
-              control={form.control}
-              render={({ field, fieldState }) => (
-                <Field data-invalid={fieldState.invalid}>
-                  <FieldLabel>Prénom</FieldLabel>
-                  <Input
-                    {...field}
-                    disabled={disabled}
-                    aria-invalid={fieldState.invalid}
-                  />
-                  {fieldState.invalid && (
-                    <FieldError errors={[fieldState.error]} />
-                  )}
-                </Field>
-              )}
-            />
-
-            <Controller
-              name="EMAIL"
-              control={form.control}
-              render={({ field, fieldState }) => (
-                <Field data-invalid={fieldState.invalid}>
-                  <FieldLabel>Email</FieldLabel>
-                  <Input
-                    {...field}
-                    disabled={disabled}
-                    aria-invalid={fieldState.invalid}
-                  />
-                  {fieldState.invalid && (
-                    <FieldError errors={[fieldState.error]} />
-                  )}
-                </Field>
-              )}
-            />
-
-            <Controller
-              name="TELEPHONE"
-              control={form.control}
-              render={({ field, fieldState }) => (
-                <Field data-invalid={fieldState.invalid}>
-                  <FieldLabel>Téléphone</FieldLabel>
-                  <Input
-                    {...field}
-                    disabled={disabled}
-                    aria-invalid={fieldState.invalid}
-                  />
-                  {fieldState.invalid && (
-                    <FieldError errors={[fieldState.error]} />
-                  )}
-                </Field>
-              )}
-            />
+                />
+              ),
+            )}
 
             <Controller
               name="TJM_SOUHAITE"
@@ -141,7 +92,7 @@ export default function IndependantForm({
                   <Input
                     {...field}
                     type="number"
-                    disabled={disabled}
+                    disabled={!isEditing}
                     aria-invalid={fieldState.invalid}
                     onChange={(e) => field.onChange(Number(e.target.value))}
                   />
@@ -161,7 +112,7 @@ export default function IndependantForm({
             <Link href="/independants">Retour à la liste</Link>
           </Button>
 
-          {mode !== "view" && (
+          {isEditing && (
             <Button
               type="button"
               variant="outline"
@@ -171,9 +122,9 @@ export default function IndependantForm({
             </Button>
           )}
 
-          {mode !== "view" && (
+          {isEditing && (
             <Button type="submit" form="independant-form">
-              {mode === "create" ? "Créer" : "Enregistrer"}
+              Enregistrer
             </Button>
           )}
         </Field>

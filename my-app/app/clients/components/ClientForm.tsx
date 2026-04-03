@@ -4,7 +4,7 @@ import Link from "next/link";
 import { Controller, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 
-import { clientSchema, ClientFormData } from "@/lib/clientSchema";
+import { clientSchema, ClientFormData } from "@/lib/schemas/clientSchema";
 import type { Client } from "@/types/client";
 
 import {
