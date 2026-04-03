@@ -64,7 +64,7 @@ export async function PUT(
   if (data.TJM_SOUHAITE !== ancien.TJM_SOUHAITE) changements++;
 
   const sql = db.prepare(
-    "UPDATE CLIENT SET NOM = ?, PRENOM = ?, EMAIL = ?, TELEPHONE = ?, TJM_SOUHAITE = ? WHERE IDI = ?",
+    "UPDATE INDEPENDANT SET NOM = ?, PRENOM = ?, EMAIL = ?, TELEPHONE = ?, TJM_SOUHAITE = ? WHERE IDI = ?",
   );
 
   sql.run(
