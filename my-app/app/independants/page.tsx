@@ -10,6 +10,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import DeleteIndependantButton from "./components/DeleteIndependantButton";
 
 export default async function IndependantsPage() {
   const independants = await getIndependants(); // ← accès DB direct, pas de fetch
@@ -43,9 +44,7 @@ export default async function IndependantsPage() {
                         Voir détails
                       </Link>
                     </Button>
-                    <Button variant="destructive" size="sm" type="submit">
-                      Supprimer
-                    </Button>
+                    <DeleteIndependantButton independantId={independant.IDI} />
                   </TableCell>
                 </TableRow>
               ))}

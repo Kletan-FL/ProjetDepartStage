@@ -1,3 +1,7 @@
+/**
+ * Formulaire générique utilisé pour créer ou modifier un client.
+ */
+
 "use client";
 
 import Link from "next/link";
@@ -5,7 +9,6 @@ import { Controller, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 
 import { clientSchema, ClientFormData } from "@/lib/schemas/clientSchema";
-import type { Client } from "@/types/client";
 
 import {
   Card,
@@ -23,66 +26,55 @@ import {
 import { Input } from "@/components/ui/input";
 import { InputGroup, InputGroupTextarea } from "@/components/ui/input-group";
 import { Button } from "@/components/ui/button";
-import { useRouter } from "next/navigation";
 
 export default function ClientForm({
-  data,
-  mode,
+  defaultValues,
+  isEditing,
+  onSubmit,
+  boutonModif,
+  title,
 }: {
-  data?: Client;
-  mode: "create" | "edit";
+  defaultValues: ClientFormData;
+  isEditing: boolean;
+  onSubmit: (values: ClientFormData) => Promise<void>;
+  boutonModif?: React.ReactNode;
+  title?: string;
 }) {
-  const router = useRouter();
-
+  // Initialisation du formulaire avec validation Zod
   const form = useForm<ClientFormData>({
     resolver: zodResolver(clientSchema),
-    defaultValues: {
-      NOM: data?.NOM ?? "",
-      SIRET: data?.SIRET ?? "",
-      VILLE: data?.VILLE ?? "",
-      DOMAINE: data?.DOMAINE ?? undefined,
-      ADRESSE: data?.ADRESSE ?? "",
-    },
+    defaultValues,
   });
-
-  async function onSubmit(values: ClientFormData) {
-    if (mode === "create") {
-      await fetch("/api/clients", {
-        method: "POST",
-        body: JSON.stringify(values),
-      });
-    } else {
-      await fetch(`/api/clients/${data!.IDC}`, {
-        method: "PUT",
-        body: JSON.stringify(values),
-      });
-    }
-
-    router.push("/clients");
-  }
 
   return (
     <Card className="w-full sm:max-w-xl mx-auto mt-8">
       <CardHeader>
         <CardTitle>
-          {mode === "create" ? "Créer un client" : "Modifier un client"}
+          {/* Titre dynamique selon le mode */}
+          {title ?? (isEditing ? "Modifier un client" : "Détails du client")}
         </CardTitle>
       </CardHeader>
 
       <CardContent>
+        {/* Formulaire identifié pour permettre un bouton submit externe */}
         <form id="client-form" onSubmit={form.handleSubmit(onSubmit)}>
           <FieldGroup>
+            {/* Chaque champ utilise Controller */}
             <Controller
               name="NOM"
               control={form.control}
               render={({ field, fieldState }) => (
                 <Field data-invalid={fieldState.invalid}>
                   <FieldLabel>Nom</FieldLabel>
+                  {/* Champ désactivé si on n'est pas en mode édition */}
                   <Input
                     {...field}
+                    disabled={!isEditing}
                     placeholder="Nom de l'entreprise"
                     aria-invalid={fieldState.invalid}
                   />
+
+                  {/* Affichage des erreurs Zod */}
                   {fieldState.invalid && (
                     <FieldError errors={[fieldState.error]} />
                   )}
@@ -98,6 +90,7 @@ export default function ClientForm({
                   <FieldLabel>SIRET</FieldLabel>
                   <Input
                     {...field}
+                    disabled={!isEditing}
                     placeholder="12345678900000"
                     aria-invalid={fieldState.invalid}
                   />
@@ -116,6 +109,7 @@ export default function ClientForm({
                   <FieldLabel>Ville</FieldLabel>
                   <Input
                     {...field}
+                    disabled={!isEditing}
                     placeholder="Nom de la ville"
                     aria-invalid={fieldState.invalid}
                   />
@@ -132,22 +126,18 @@ export default function ClientForm({
               render={({ field, fieldState }) => (
                 <Field data-invalid={fieldState.invalid}>
                   <FieldLabel>Domaine</FieldLabel>
-
                   <select
                     {...field}
-                    onChange={(e) =>
-                      field.onChange(e.target.value || undefined)
-                    }
+                    disabled={!isEditing}
+                    onChange={(e) => field.onChange(e.target.value || "")}
                     className="border rounded px-2 py-1"
                     aria-invalid={fieldState.invalid}
                   >
-                    <option value="">Choisir un domaine</option>
                     <option value="Informatique">Informatique</option>
                     <option value="Finance">Finance</option>
                     <option value="Marketing">Marketing</option>
                     <option value="RH">RH</option>
                   </select>
-
                   {fieldState.invalid && (
                     <FieldError errors={[fieldState.error]} />
                   )}
@@ -161,9 +151,12 @@ export default function ClientForm({
               render={({ field, fieldState }) => (
                 <Field data-invalid={fieldState.invalid}>
                   <FieldLabel>Adresse</FieldLabel>
+
+                  {/* Zone de texte stylisée via InputGroup (plus de lignes)*/}
                   <InputGroup>
                     <InputGroupTextarea
                       {...field}
+                      disabled={!isEditing}
                       placeholder="1 Rue Nomderue"
                       rows={3}
                       aria-invalid={fieldState.invalid}
@@ -181,17 +174,31 @@ export default function ClientForm({
 
       <CardFooter>
         <Field orientation="horizontal">
+          {/* Bouton de retour */}
           <Button variant="outline" asChild>
             <Link href="/clients">Retour à la liste</Link>
           </Button>
 
-          <Button type="button" variant="outline" onClick={() => form.reset()}>
-            Reset
-          </Button>
+          {/* Bouton de modification fourni par le parent */}
+          {boutonModif}
 
-          <Button type="submit" form="client-form">
-            {mode === "create" ? "Créer" : "Enregistrer"}
-          </Button>
+          {/* Bouton Reset visible uniquement en mode édition */}
+          {isEditing && (
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => form.reset()}
+            >
+              Reset
+            </Button>
+          )}
+
+          {/* Bouton d’enregistrement lié au formulaire */}
+          {isEditing && (
+            <Button type="submit" form="client-form">
+              Enregistrer
+            </Button>
+          )}
         </Field>
       </CardFooter>
     </Card>

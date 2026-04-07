@@ -27,13 +27,13 @@ export default function IndependantForm({
   defaultValues,
   isEditing,
   onSubmit,
-  boutonHeader,
+  boutonModif,
   title,
 }: {
   defaultValues: IndependantFormData;
   isEditing: boolean; // true = champs actifs, false = champs désactivés
   onSubmit: (values: IndependantFormData) => Promise<void>;
-  boutonHeader?: React.ReactNode;
+  boutonModif?: React.ReactNode;
   title?: string; // "Créer un indépendant" ou "Détails de l'indépendant"
 }) {
   const form = useForm<IndependantFormData>({
@@ -41,7 +41,6 @@ export default function IndependantForm({
     defaultValues,
   });
 
-  // Plus de variable `disabled` intermédiaire — on utilise isEditing directement
   return (
     <Card className="w-full sm:max-w-xl mx-auto mt-8">
       <CardHeader>
@@ -52,8 +51,6 @@ export default function IndependantForm({
               : "Détails de l'indépendant")}
         </CardTitle>
       </CardHeader>
-
-      {boutonHeader}
 
       <CardContent>
         <form id="independant-form" onSubmit={form.handleSubmit(onSubmit)}>
@@ -111,6 +108,8 @@ export default function IndependantForm({
           <Button variant="outline" asChild>
             <Link href="/independants">Retour à la liste</Link>
           </Button>
+
+          {boutonModif}
 
           {isEditing && (
             <Button

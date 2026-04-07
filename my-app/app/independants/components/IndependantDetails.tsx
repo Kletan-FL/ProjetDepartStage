@@ -34,9 +34,9 @@ export default function IndependantDetails({
       defaultValues={defaultValues}
       isEditing={isEditing}
       onSubmit={handleUpdate}
-      boutonHeader={
+      boutonModif={
         isEditing ? (
-          <Button variant="outline" onClick={() => setIsEditing(false)}>
+          <Button variant="destructive" onClick={() => setIsEditing(false)}>
             Annuler
           </Button>
         ) : (
