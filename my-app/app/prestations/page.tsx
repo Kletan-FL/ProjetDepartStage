@@ -1,3 +1,7 @@
+/**
+ * Page listant l'ensemble des prestations enregistrées.
+ */
+
 import Link from "next/link";
 import { getPrestations } from "@/lib/actions/prestations";
 import { getStatut, STATUT_LABELS } from "@/lib/utils/prestationStatut";
@@ -22,10 +26,13 @@ export default async function PrestationsPage() {
       <Card>
         <CardHeader className="flex flex-row items-center justify-between">
           <CardTitle className="text-2xl">Liste des prestations</CardTitle>
+
+          {/* Bouton asChild pour transformer le bouton en lien */}
           <Button asChild>
             <Link href="/prestations/new">Créer une prestation</Link>
           </Button>
         </CardHeader>
+
         <CardContent>
           <Table>
             <TableHeader>
@@ -48,11 +55,15 @@ export default async function PrestationsPage() {
                     <TableCell>
                       {p.NOM_INDEPENDANT} {p.PRENOM_INDEPENDANT}
                     </TableCell>
+
+                    {/* Utilisation du component Badge */}
                     <TableCell>
                       <Badge variant={variant} icon={icon}>
                         {label}
                       </Badge>
                     </TableCell>
+
+                    {/* Bouton de navigation vers la page de détails */}
                     <TableCell>
                       <Button variant="outline" size="sm" asChild>
                         <Link href={`/prestations/${p.IDP}`}>Voir détails</Link>

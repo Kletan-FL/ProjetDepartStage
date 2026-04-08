@@ -1,3 +1,7 @@
+/**
+ * Formulaire générique utilisé pour créer ou modifier une prestation.
+ */
+
 "use client";
 
 import Link from "next/link";
@@ -60,6 +64,7 @@ export default function PrestationForm({
   clients: Client[];
   independants: Independant[];
 }) {
+  // Initialisation du formulaire avec validation Zod
   const form = useForm<PrestationFormData>({
     resolver: zodResolver(prestationSchema),
     defaultValues,
@@ -69,6 +74,7 @@ export default function PrestationForm({
     <Card className="w-full sm:max-w-xl mx-auto mt-8">
       <CardHeader>
         <CardTitle>
+          {/* Titre dynamique selon le mode */}
           {title ??
             (isEditing
               ? "Modifier une prestation"
@@ -77,25 +83,32 @@ export default function PrestationForm({
       </CardHeader>
 
       <CardContent>
+        {/* Formulaire identifié pour permettre bouton submit externe */}
         <form id="prestation-form" onSubmit={form.handleSubmit(onSubmit)}>
           <FieldGroup>
+            {/* Chaque champ utilise Controller */}
             <Controller
               name="INTITULE"
               control={form.control}
               render={({ field, fieldState }) => (
                 <Field data-invalid={fieldState.invalid}>
                   <FieldLabel>Intitulé</FieldLabel>
+                  {/* Champ désactivé si on n'est pas en mode édition */}
                   <Input
                     {...field}
                     disabled={!isEditing}
                     aria-invalid={fieldState.invalid}
                   />
+
+                  {/* Affichage des erreurs Zod */}
                   {fieldState.invalid && (
                     <FieldError errors={[fieldState.error]} />
                   )}
                 </Field>
               )}
             />
+
+            {/* Ancien code, tentative de menu déroulant avec Combobox */}
 
             {/*
             <Controller
@@ -162,6 +175,8 @@ export default function PrestationForm({
                 </Select>
               )}
             />
+
+            {/* Ancien code, tentative de menu déroulant avec Combobox */}
 
             {/*
             <Controller
@@ -313,12 +328,15 @@ export default function PrestationForm({
 
       <CardFooter>
         <Field orientation="horizontal">
+          {/* Bouton de retour */}
           <Button variant="outline" asChild>
             <Link href="/prestations">Retour à la liste</Link>
           </Button>
 
+          {/* Bouton de modification fourni par le parent */}
           {boutonModif}
 
+          {/* Bouton Reset visible uniquement en mode édition */}
           {isEditing && (
             <Button
               type="button"
@@ -328,6 +346,8 @@ export default function PrestationForm({
               Reset
             </Button>
           )}
+
+          {/* Bouton d’enregistrement lié au formulaire */}
           {isEditing && (
             <Button type="submit" form="prestation-form">
               Enregistrer

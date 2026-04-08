@@ -1,5 +1,5 @@
 /**
- * Composant affichant les détails d’un client avec possibilité d’édition.
+ * Composant affichant les détails d’un client avec possibilité de modification.
  */
 
 "use client";

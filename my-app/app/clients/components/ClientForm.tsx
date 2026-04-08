@@ -56,7 +56,7 @@ export default function ClientForm({
       </CardHeader>
 
       <CardContent>
-        {/* Formulaire identifié pour permettre un bouton submit externe */}
+        {/* Formulaire identifié pour permettre bouton submit externe */}
         <form id="client-form" onSubmit={form.handleSubmit(onSubmit)}>
           <FieldGroup>
             {/* Chaque champ utilise Controller */}

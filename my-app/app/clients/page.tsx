@@ -26,7 +26,7 @@ export default async function ClientsPage() {
         <CardHeader className="flex flex-row items-center justify-between">
           <CardTitle className="text-2xl">Liste des clients</CardTitle>
 
-          {/* Bouton utilisant `asChild` pour transformer le bouton en lien */}
+          {/* Bouton asChild pour transformer le bouton en lien */}
           <Button asChild>
             <Link href="/clients/new">Créer un client</Link>
           </Button>
@@ -54,7 +54,7 @@ export default async function ClientsPage() {
                       <Link href={`/clients/${client.IDC}`}>Voir détails</Link>
                     </Button>
 
-                    {/* Composant isolé gérant la suppression */}
+                    {/* Component gérant la suppression */}
                     <DeleteClientButton clientId={client.IDC} />
                   </TableCell>
                 </TableRow>

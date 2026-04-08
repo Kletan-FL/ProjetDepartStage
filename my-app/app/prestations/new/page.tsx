@@ -1,3 +1,7 @@
+/**
+ * Page permettant de créer une nouvelle prestation.
+ */
+
 import { createPrestation } from "@/lib/actions/prestations";
 import PrestationForm from "../components/PrestationForm";
 import { getClients } from "@/lib/actions/clients";
@@ -9,6 +13,7 @@ export default async function NewPrestationPage() {
 
   return (
     <PrestationForm
+      // Valeurs initiales du formulaire
       defaultValues={{
         IDC: 0,
         IDI: 0,
@@ -18,9 +23,13 @@ export default async function NewPrestationPage() {
         DATE_FIN: null,
         TJM_FINAL: null,
       }}
+      // Indique au formulaire qu'il s'agit d'une création/modification
       isEditing={true}
+      // Titre affiché en haut du formulaire
       title="Créer une prestation"
+      // Fonction appelée lors de la soumission
       onSubmit={createPrestation}
+      // Listes des clients/indépendants pour menu déroulant
       clients={clients}
       independants={independants}
     />

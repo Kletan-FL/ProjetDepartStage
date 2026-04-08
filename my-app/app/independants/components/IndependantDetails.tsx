@@ -1,4 +1,6 @@
-// Client Component qui gère le mode entre View et Update
+/**
+ * Composant affichant les détails d’un indépendant avec possibilité de modification.
+ */
 
 "use client";
 
@@ -14,8 +16,10 @@ export default function IndependantDetails({
 }: {
   independant: Independant;
 }) {
+  // Gère l'état du formulaire : affichage ou édition
   const [isEditing, setIsEditing] = useState(false);
 
+  // Valeurs initiales du formulaire
   const defaultValues: IndependantFormData = {
     NOM: independant.NOM,
     PRENOM: independant.PRENOM,
@@ -24,9 +28,10 @@ export default function IndependantDetails({
     TJM_SOUHAITE: independant.TJM_SOUHAITE,
   };
 
+  // Fonction appelée lors de la soumission du formulaire
   async function handleUpdate(values: IndependantFormData) {
     await updateIndependant(independant.IDI, values);
-    setIsEditing(false);
+    setIsEditing(false); // Retour au mode lecture après mise à jour
   }
 
   return (
@@ -36,10 +41,12 @@ export default function IndependantDetails({
       onSubmit={handleUpdate}
       boutonModif={
         isEditing ? (
+          // Bouton affiché en mode édition = permet d'annuler les modifications
           <Button variant="destructive" onClick={() => setIsEditing(false)}>
             Annuler
           </Button>
         ) : (
+          // Bouton affiché en mode lecture = active le mode édition
           <Button onClick={() => setIsEditing(true)}>Modifier</Button>
         )
       }

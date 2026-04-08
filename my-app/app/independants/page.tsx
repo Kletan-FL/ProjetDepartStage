@@ -1,3 +1,7 @@
+/**
+ * Page listant l'ensemble des indépendants enregistrés.
+ */
+
 import Link from "next/link";
 import { getIndependants } from "@/lib/actions/independants";
 import { Button } from "@/components/ui/button";
@@ -13,13 +17,15 @@ import {
 import DeleteIndependantButton from "./components/DeleteIndependantButton";
 
 export default async function IndependantsPage() {
-  const independants = await getIndependants(); // ← accès DB direct, pas de fetch
+  // Récupération des indépendants depuis la base
+  const independants = await getIndependants();
 
   return (
     <div className="max-w-4xl mx-auto mt-10">
       <Card>
         <CardHeader className="flex flex-row items-center justify-between">
           <CardTitle className="text-2xl">Liste des indépendants</CardTitle>
+          {/* Bouton asChild pour transformer le bouton en lien */}
           <Button asChild>
             <Link href="/independants/new">Créer un indépendant</Link>
           </Button>
@@ -38,12 +44,16 @@ export default async function IndependantsPage() {
                 <TableRow key={independant.IDI}>
                   <TableCell>{independant.NOM}</TableCell>
                   <TableCell>{independant.PRENOM}</TableCell>
+
                   <TableCell className="space-x-2">
+                    {/* Bouton de navigation vers la page de détails */}
                     <Button variant="outline" size="sm" asChild>
                       <Link href={`/independants/${independant.IDI}`}>
                         Voir détails
                       </Link>
                     </Button>
+
+                    {/* Component gérant la suppression */}
                     <DeleteIndependantButton independantId={independant.IDI} />
                   </TableCell>
                 </TableRow>

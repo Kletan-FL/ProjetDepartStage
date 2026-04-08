@@ -8,7 +8,7 @@ import { createClient } from "@/lib/actions/clients";
 export default function NewClientPage() {
   return (
     <ClientForm
-      // Valeurs initiales du formulaire (tous les champs vides)
+      // Valeurs initiales du formulaire
       defaultValues={{
         NOM: "",
         SIRET: "",
@@ -16,8 +16,8 @@ export default function NewClientPage() {
         DOMAINE: "Informatique",
         ADRESSE: "",
       }}
-      // Indique au formulaire qu'il s'agit d'une création et non d'une édition
-      isEditing={false}
+      // Indique au formulaire qu'il s'agit d'une création/modification
+      isEditing={true}
       // Titre affiché en haut du formulaire
       title="Créer un client"
       // Fonction appelée lors de la soumission
